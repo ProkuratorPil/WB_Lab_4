@@ -102,7 +102,7 @@ curl -X GET http://localhost:4200/auth/whoami \
 
 ### OAuth Яндекс
 
-1. Перейдите на [http://localhost:4200/auth/oauth/yandex]()
+1. Перейдите на [http://localhost:4200/auth/oauth/yandex](http://localhost:4200/auth/oauth/yandex)
 2. Авторизуйтесь в Яндексе
 3. Бrowser перенаправит на `/` с установленными cookies
 
