@@ -22,9 +22,9 @@ class Settings(BaseSettings):
     YANDEX_CALLBACK_URL: str
 
     # VK OAuth
-    VK_CLIENT_ID: str
-    VK_CLIENT_SECRET: str
-    VK_CALLBACK_URL: str
+    VK_CLIENT_ID: str = ""
+    VK_CLIENT_SECRET: str = ""
+    VK_CALLBACK_URL: str = ""
 
     class Config:
         env_file = ".env"
