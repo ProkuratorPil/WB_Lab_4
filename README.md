@@ -1,4 +1,4 @@
-# User & File Management API v2.0
+# Лабораторная Работа №3
 
 RESTful API для управления пользователями и файлами с JWT аутентификацией и OAuth 2.0.
 
@@ -25,7 +25,6 @@ cp .env.example .env
 - `JWT_ACCESS_SECRET` - Секретный ключ для Access токена
 - `JWT_REFRESH_SECRET` - Секретный ключ для Refresh токена
 - `YANDEX_CLIENT_ID` / `YANDEX_CLIENT_SECRET` - Данные OAuth приложения Яндекс
-- `VK_CLIENT_ID` / `VK_CLIENT_SECRET` - Данные OAuth приложения VK
 
 ### 2. Запуск через Docker
 
@@ -165,12 +164,3 @@ pytest
 # Тест конкретного модуля
 pytest tests/test_auth.py -v
 ```
-
-## TODO
-
-- [ ] Реализация отправки email для сброса пароля
-- [ ] Система ролей (Admin, User)
-- [ ] Rate limiting
-- [ ] Документация Swagger/OpenAPI
-- [ ] Юнит-тесты
-- [ ] Redis для хранения OAuth state
