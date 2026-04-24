@@ -1,166 +1,172 @@
-# Лабораторная Работа №3
+# Лабораторная работа №3: Web API на FastAPI
 
-RESTful API для управления пользователями и файлами с JWT аутентификацией и OAuth 2.0.
+RESTful API сервис для управления пользователями с аутентификацией JWT и OAuth 2.0.
 
-## Возможности
+## 📋 Содержание
+- [Описание](#описание)
+- [Технологии](#технологии)
+- [Установка и запуск](#установка-и-запуск)
+- [API Документация](#api-документация)
+- [Архитектура](#архитектура)
+- [Эндпоинты](#эндпоинты)
+- [Аутентификация](#аутентификация)
+- [Авторы](#авторы)
 
-- 🔐 **JWT Аутентификация** - Access и Refresh токены с хешированием
-- 🔑 **OAuth 2.0** - Вход через Яндекс и VK
-- 🔒 **Безопасность** - Хеширование паролей с солью (bcrypt), защита токенов
-- 👤 **Soft Delete** - Восстанавливаемые удалённые записи
-- 📄 **DTO Валидация** - Pydantic модели для всех запросов/ответов
-- 🐳 **Docker Ready** - Контейнеризация с healthcheck
+## 📝 Описание
 
-## Быстрый старт
+Реализация полноценного REST API с:
+- CRUD операциями над пользователями
+- JWT аутентификацией (access + refresh токены)
+- OAuth 2.0 авторизацией через Яндекс и VK
+- Пагинацией, валидацией и обработкой ошибок
+- OpenAPI 3.0 документацией
 
-### 1. Настройка переменных окружения
+## 🛠 Технологии
 
-Скопируйте `.env.example` в `.env` и заполните значения:
+| Компонент | Версия |
+|-----------|--------|
+| Python | 3.11+ |
+| FastAPI | 0.109+ |
+| SQLAlchemy | 2.0+ |
+| PostgreSQL | 15 |
+| Pydantic | 2.0+ |
+| Uvicorn | 0.27+ |
 
+## 🚀 Установка и запуск
+
+### 1. Клонирование репозитория
+```bash
+git clone https://github.com/ProkuratorPil/Web_Lab_3.git
+cd Web_Lab_3
+```
+
+### 2. Установка зависимостей
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Настройка окружения
+Скопируйте пример конфигурации и заполните переменные:
 ```bash
 cp .env.example .env
 ```
 
-**Обязательные переменные:**
-- `JWT_ACCESS_SECRET` - Секретный ключ для Access токена
-- `JWT_REFRESH_SECRET` - Секретный ключ для Refresh токена
-- `YANDEX_CLIENT_ID` / `YANDEX_CLIENT_SECRET` - Данные OAuth приложения Яндекс
+Обязательные параметры в `.env`:
+```ini
+# База данных
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=lab_db
 
-### 2. Запуск через Docker
+# JWT ключи
+JWT_ACCESS_SECRET=your_secret_key
+JWT_REFRESH_SECRET=your_refresh_key
 
-```bash
-docker-compose up --build
+# OAuth провайдеры
+YANDEX_CLIENT_ID=your_client_id
+YANDEX_CLIENT_SECRET=your_client_secret
 ```
 
-Приложение будет доступно на `http://localhost:4200`
-
-## API Endpoints
-
-### Аутентификация `/auth`
-
-| Метод | URI | Описание | Доступ |
-|-------|-----|---------|--------|
-| POST | `/auth/register` | Регистрация | Public |
-| POST | `/auth/login` | Вход | Public |
-| POST | `/auth/refresh` | Обновление токенов | Public (нужен Refresh Cookie) |
-| GET | `/auth/whoami` | Данные текущего пользователя | Private |
-| POST | `/auth/logout` | Завершение сессии | Private |
-| POST | `/auth/logout-all` | Завершение всех сессий | Private |
-| GET | `/auth/oauth/{provider}` | Инициация OAuth | Public |
-| GET | `/auth/oauth/{provider}/callback` | OAuth Callback | Public |
-| POST | `/auth/forgot-password` | Запрос сброса пароля | Public |
-| POST | `/auth/reset-password` | Установка нового пароля | Public |
-
-### Пользователи `/users`
-
-| Метод | URI | Описание | Доступ |
-|-------|-----|---------|--------|
-| POST | `/users/` | Создание пользователя | Public |
-| GET | `/users/` | Список пользователей | Private |
-| GET | `/users/{id}` | Получить пользователя | Private |
-| PUT | `/users/{id}` | Полное обновление | Private (владелец) |
-| PATCH | `/users/{id}` | Частичное обновление | Private (владелец) |
-| DELETE | `/users/{id}` | Удаление | Private (владелец) |
-
-### Файлы `/files`
-
-| Метод | URI | Описание | Доступ |
-|-------|-----|---------|--------|
-| POST | `/files/` | Создание записи о файле | Private |
-| GET | `/files/` | Список файлов | Private (свои) |
-| GET | `/files/{id}` | Получить файл | Private (владелец) |
-| PUT | `/files/{id}` | Обновление | Private (владелец) |
-| PATCH | `/files/{id}` | Частичное обновление | Private (владелец) |
-| DELETE | `/files/{id}` | Удаление | Private (владелец) |
-
-## Примеры использования
-
-### Регистрация
-
+### 4. Запуск базы данных
 ```bash
-curl.exe -X POST http://localhost:4200/auth/register -H "Content-Type: application/json" -d '{"username": "testuser", "email": "test@example.com", "password": "SecurePass123"}'
+docker-compose up -d postgres
 ```
 
-### Вход
-
+### 5. Применение миграций
 ```bash
-curl -X POST http://localhost:4200/auth/login \
-  -H "Content-Type: application/json" \
-  -c cookies.txt \
-  -d '{
-    "email": "test@example.com",
-    "password": "SecurePass123"
-  }'
+alembic upgrade head
 ```
 
-### Проверка статуса (нужен Cookie)
-
+### 6. Запуск сервиса
 ```bash
-curl -X GET http://localhost:4200/auth/whoami \
-  -b cookies.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### OAuth Яндекс
+Сервис будет доступен по адресу: `http://localhost:8000`
 
-1. Перейдите на [http://localhost:4200/auth/oauth/yandex](http://localhost:4200/auth/oauth/yandex)
-2. Авторизуйтесь в Яндексе
-3. Бrowser перенаправит на `/` с установленными cookies
+## 📚 API Документация
 
-## Безопасность
+После запуска доступны два варианта документации:
 
-### Cookies
-- `HttpOnly` - Защита от XSS
-- `Secure` - Только HTTPS (в production)
-- `SameSite=Lax` - Защита от CSRF
+| Интерфейс | Адрес |
+|-----------|-------|
+| Swagger UI | http://localhost:8000/docs |
+| ReDoc | http://localhost:8000/redoc |
 
-### Токены
-- Access Token: 15 минут
-- Refresh Token: 7 дней
-- Токены хешируются перед сохранением в БД
+✅ В документации реализована авторизация через JWT, можно тестировать все эндпоинты напрямую из браузера.
 
-### Пароли
-- Хеширование bcrypt с автоматической солью
-- Минимум 8 символов, заглавные, строчные, цифры
-
-## Архитектура
+## 🏗 Архитектура
 
 ```
 app/
-├── core/
-│   ├── config.py       # Настройки из .env
-│   ├── database.py     # SQLAlchemy engine
-│   ├── security.py     # Хеширование паролей и токенов
-│   ├── jwt.py          # Генерация и валидация JWT
-│   ├── dependencies.py # FastAPI dependencies
+├── core/           # Конфигурация, безопасность, утилиты
+│   ├── config.py
+│   ├── database.py
+│   ├── jwt.py
 │   └── oauth/
-│       └── providers.py # OAuth провайдеры
-├── models/
-│   ├── user.py         # Модель User
-│   ├── token.py        # Модель Token
-│   └── uploaded_file.py # Модель File
-├── schemas/
-│   ├── auth.py         # DTO для аутентификации
-│   ├── user.py         # DTO для пользователей
-│   └── file.py         # DTO для файлов
-├── crud/
-│   ├── book.py         # CRUD пользователей
-│   ├── file_crud.py    # CRUD файлов
-│   └── token_crud.py   # CRUD токенов
-├── services/
-│   ├── user_service.py # Бизнес-логика пользователей
-│   └── file_service.py # Бизнес-логика файлов
-└── routers/
-    ├── auth_router.py  # Эндпоинты аутентификации
-    ├── user_router.py  # Эндпоинты пользователей
-    └── file_router.py  # Эндпоинты файлов
+├── models/         # SQLAlchemy модели
+├── schemas/        # Pydantic схемы (DTO)
+├── crud/           # Операции с базой данных
+├── services/       # Бизнес логика
+├── routers/        # Роутеры API
+└── dependencies.py # Зависимости FastAPI
 ```
 
-## Тестирование
+## 🔌 Эндпоинты
 
-```bash
-# Запуск всех тестов
-pytest
+### Аутентификация
+| Метод | Путь | Описание | Доступ |
+|-------|------|----------|--------|
+| POST | `/auth/login` | Вход по логину/паролю | Публичный |
+| POST | `/auth/refresh` | Обновление токена | Публичный |
+| GET | `/auth/oauth/yandex` | Авторизация через Яндекс | Публичный |
+| GET | `/auth/oauth/vk` | Авторизация через VK | Публичный |
+| GET | `/auth/whoami` | Информация о текущем пользователе | Приватный |
 
-# Тест конкретного модуля
-pytest tests/test_auth.py -v
+### Пользователи
+| Метод | Путь | Описание | Доступ |
+|-------|------|----------|--------|
+| POST | `/users` | Создание пользователя | Публичный |
+| GET | `/users` | Список пользователей (с пагинацией) | Приватный |
+| GET | `/users/{id}` | Получение пользователя по ID | Приватный |
+| PUT | `/users/{id}` | Полное обновление | Приватный (владелец) |
+| PATCH | `/users/{id}` | Частичное обновление | Приватный (владелец) |
+| DELETE | `/users/{id}` | Удаление (Soft Delete) | Приватный (владелец) |
+
+## 🔐 Аутентификация
+
+Для доступа к приватным эндпоинтам необходимо передавать токен в заголовке:
 ```
+Authorization: Bearer <access_token>
+```
+
+Токен выдается при успешном входе и действителен 15 минут.
+Для продления сессии используйте `/auth/refresh` эндпоинт.
+
+## ✅ Особенности реализации
+
+- ✅ Валидация всех входящих данных через Pydantic
+- ✅ Унифицированные ответы с пагинацией
+- ✅ Мягкое удаление пользователей (soft delete)
+- ✅ Проверка прав доступа на каждое действие
+- ✅ Автоматическая OpenAPI документация
+- ✅ Поддержка нескольких OAuth провайдеров
+- ✅ Разделение прав доступа (владелец / администратор)
+
+## 🧪 Тестирование
+
+Для тестирования API используйте встроенную документацию Swagger UI:
+1. Откройте http://localhost:8000/docs
+2. Нажмите кнопку `Authorize`
+3. Введите полученный access токен
+4. Протестируйте любые эндпоинты
+
+## 📝 Переменные окружения
+
+Полный список параметров конфигурации находится в файле `.env.example`.
+
+## 👥 Авторы
+
+Разработано в рамках лабораторной работы по Web-технологиям.

@@ -8,10 +8,30 @@ from app.models.user import User
 from app.services.user_service import UserService
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, PaginationParams, PaginatedResponse
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(
+    prefix="/users",
+    tags=["users"],
+    responses={
+        401: {"description": "Необходима аутентификация"},
+        403: {"description": "Недостаточно прав"},
+        404: {"description": "Пользователь не найден"},
+        500: {"description": "Внутренняя ошибка сервера"}
+    }
+)
 
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Создание нового пользователя",
+    description="Создает нового пользователя с указанными данными. Пользователь создается неактивированным.",
+    response_description="Данные созданного пользователя",
+    responses={
+        400: {"description": "Ошибка валидации данных"},
+        422: {"description": "Некорректные данные в запросе"}
+    }
+)
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Создание нового пользователя.
@@ -22,7 +42,13 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     return user
 
 
-@router.get("/", response_model=PaginatedResponse)
+@router.get(
+    "/",
+    response_model=PaginatedResponse,
+    summary="Получение списка пользователей",
+    description="Возвращает пагинированный список всех активных пользователей",
+    response_description="Пагинированный список пользователей",
+)
 def get_users(
     pagination: PaginationParams = Depends(),
     db: Session = Depends(get_db),
@@ -46,7 +72,13 @@ def get_users(
     }
 
 
-@router.get("/{user_id}", response_model=UserResponse)
+@router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+    summary="Получение пользователя по ID",
+    description="Возвращает данные пользователя по указанному ID",
+    response_description="Данные пользователя",
+)
 def get_user(
     user_id: UUID,
     db: Session = Depends(get_db),
@@ -63,7 +95,14 @@ def get_user(
     return user
 
 
-@router.put("/{user_id}", response_model=UserResponse)
+@router.put(
+    "/{user_id}",
+    response_model=UserResponse,
+    summary="Полное обновление пользователя",
+    description="Обновляет все поля пользователя (PUT). Пользователь может редактировать только свой профиль.",
+    response_description="Данные обновленного пользователя",
+    openapi_extra={"security": [{"bearerAuth": []}]}
+)
 def update_user_full(
     user_id: UUID,
     user_data: UserUpdate,
@@ -80,7 +119,7 @@ def update_user_full(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Нет прав на редактирование этого пользователя"
         )
-    
+
     service = UserService(db)
     user = service.update(user_id, user_data, partial=False)
     if not user:
@@ -88,7 +127,14 @@ def update_user_full(
     return user
 
 
-@router.patch("/{user_id}", response_model=UserResponse)
+@router.patch(
+    "/{user_id}",
+    response_model=UserResponse,
+    summary="Частичное обновление пользователя",
+    description="Обновляет указанные поля пользователя (PATCH). Пользователь может редактировать только свой профиль.",
+    response_description="Данные обновленного пользователя",
+    openapi_extra={"security": [{"bearerAuth": []}]}
+)
 def update_user_partial(
     user_id: UUID,
     user_data: UserUpdate,
@@ -105,7 +151,7 @@ def update_user_partial(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Нет прав на редактирование этого пользователя"
         )
-    
+
     service = UserService(db)
     user = service.update(user_id, user_data, partial=True)
     if not user:
@@ -113,7 +159,13 @@ def update_user_partial(
     return user
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Удаление пользователя (Soft Delete)",
+    description="Помечает пользователя как удаленного (Soft Delete). Пользователь может удалить только свой профиль.",
+    openapi_extra={"security": [{"bearerAuth": []}]}
+)
 def delete_user(
     user_id: UUID,
     db: Session = Depends(get_db),
@@ -129,7 +181,7 @@ def delete_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Нет прав на удаление этого пользователя"
         )
-    
+
     service = UserService(db)
     deleted = service.delete(user_id)
     if not deleted:

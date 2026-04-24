@@ -3,33 +3,37 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # Environment
+    NODE_ENV: str = "development"
+
     # Database
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_NAME: str
-    PORT: int = 4200
+    DB_USER: str = "postgres"
+    DB_PASSWORD: str = "postgres"
+    DB_NAME: str = "lab_db"
+    PORT: int = 8000
 
     # JWT Secrets
-    JWT_ACCESS_SECRET: str
-    JWT_REFRESH_SECRET: str
+    JWT_ACCESS_SECRET: str = "ba55f4e67c736521ae68caa5b307a2a0838e13193b7a0dbb87f31261aadceaab"
+    JWT_REFRESH_SECRET: str = "c719a22d50a965ee222bca0c30cfcfe7f330a70e8cf7705c3fa2511f9389d38a"
     JWT_ACCESS_EXPIRATION: str = "15m"
     JWT_REFRESH_EXPIRATION: str = "7d"
 
     # Yandex OAuth
-    YANDEX_CLIENT_ID: str
-    YANDEX_CLIENT_SECRET: str
-    YANDEX_CALLBACK_URL: str
+    YANDEX_CLIENT_ID: str = "aef65f68dbaf46a0a0f2af20ce216d72"
+    YANDEX_CLIENT_SECRET: str = "daa09f23542b437fb0fced37249809a9"
+    YANDEX_CALLBACK_URL: str = "http://localhost:8000/auth/oauth/yandex/callback"
 
     # VK OAuth
-    VK_CLIENT_ID: str = ""
-    VK_CLIENT_SECRET: str = ""
-    VK_CALLBACK_URL: str = ""
+    VK_CLIENT_ID: str = "7890123"
+    VK_CLIENT_SECRET: str = "your_vk_client_secret_here"
+    VK_CALLBACK_URL: str = "http://localhost:8000/auth/oauth/vk/callback"
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "allow"
 
 
 settings = Settings()

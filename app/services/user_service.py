@@ -58,6 +58,9 @@ class UserService:
         print(f"DEBUG UserService.update: Found user {user.id} before update.")
 
         update_data = data.model_dump(exclude_unset=partial)
+        # Исключаем поля со значением None, чтобы не перезаписывать их в БД
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+        
         if 'password' in update_data and update_data['password'] is not None:
             update_data['hashed_password'] = self.hash_password(update_data.pop('password'))
 
