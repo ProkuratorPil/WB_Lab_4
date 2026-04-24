@@ -112,11 +112,15 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 3. Выберите один из способов:
    - **bearerAuth**: Введите `Bearer <your_jwt_token>`
    - **cookieAuth**: Токен из cookies отправляется автоматически (при входе через `/auth/login`)
-   - **oauth2**: Для тестирования Яндекс OAuth через Swagger UI необходимо добавить `http://localhost:8000/docs` в Callback URLs приложения на [oauth.yandex.ru](https://oauth.yandex.ru/)
+   - **oauth2**: Для тестирования Яндекс OAuth через Swagger UI
 4. Нажмите **Authorize** и закройте окно
 5. Теперь все защищённые эндпоинты помечены замком 🔒 и могут быть протестированы
 
-> ⚠️ **Важно:** Swagger UI при OAuth2 авторизации отправляет `redirect_uri` = текущий URL страницы (`http://localhost:8000/docs`). Для корректной работы добавьте этот URL в список **Callback URL** вашего приложения на [https://oauth.yandex.ru/](https://oauth.yandex.ru/). Без этого Яндекс будет возвращать ошибку «redirect_uri не совпадает».
+> ⚠️ **Важно:** Swagger UI при OAuth2 авторизации отправляет `redirect_uri` = `http://localhost:8000/docs/oauth2-redirect` (добавляет `/oauth2-redirect` к URL документации). Для корректной работы добавьте **полный URL** в список **Callback URL** вашего приложения на [https://oauth.yandex.ru/](https://oauth.yandex.ru/):
+> - `http://localhost:4200/docs/oauth2-redirect` (если через Docker)
+> - `http://localhost:8000/docs/oauth2-redirect` (если через `uvicorn` локально)
+>
+> Без этого Яндекс будет возвращать ошибку «redirect_uri не совпадает».
 
 ### Примеры запросов и ответов
 
